@@ -30,6 +30,16 @@ ALLOWED_HOSTS = []
 
 AUTH_USER_MODEL = 'users.UserModel'
 
+# Backend for case insensitive email
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.AllowAllUsersModelBackend',
+    'users.backends.CaseInsensitiveModelBackend'
+]
+
+# Email sender (DEVELOPMENT ONLY)
+if DEBUG:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
 # Application definition
 
 INSTALLED_APPS = [
