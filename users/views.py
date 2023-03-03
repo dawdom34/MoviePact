@@ -64,8 +64,6 @@ def register_view(request):
 
     return render(request, 'users/register.html', context)
 
-    return render(request, 'users/register.html')
-
 def logout_view(request):
     """
     Logout user

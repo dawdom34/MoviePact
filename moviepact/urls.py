@@ -15,13 +15,32 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from django.contrib.auth import views as auth_views
+
 from .views import home_page_view 
 from users.views import login_view, register_view, logout_view
 
 urlpatterns = [
+    # Admin
     path('admin/', admin.site.urls),
-    path('', home_page_view, name='home'),
+
+    # Auth
     path('login/', login_view, name='login'),
     path('logout/', logout_view, name='logout'),
     path('register/', register_view, name='register'),
+
+    # Home page
+    path('', home_page_view, name='home'),
+
+    # Password change
+    path('password_change/', auth_views.PasswordChangeView.as_view(template_name='password_reset/password_change.html'), name='password_change'),
+    path('password_change_done/', auth_views.PasswordChangeView.as_view(template_name='password_reset/password_change_done.html'), name='password_change_done'),
+
+    # Password reset
+    path('password_reset/', auth_views.PasswordResetView.as_view(template_name='password_reset/password_reset_form.html'), name='password_reset'),
+    path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
+    path('reset/done/', auth_views.PasswordResetCompleteView.as_view(
+        template_name='password_reset/password_reset_complete.html'), name='password_reset_complete'),
+    path('password_reset/done/', auth_views.PasswordResetCompleteView.as_view(
+        template_name='password_reset/password_reset_done.html'), name='password_reset_done'),
 ]

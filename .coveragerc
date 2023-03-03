@@ -1,0 +1,10 @@
+[run]
+source = users/
+omit=
+    venv
+    */apps.py
+    */admin.py
+    */urls.py
+    */migrations/*
+    *__init__.py
+    */backends.py
