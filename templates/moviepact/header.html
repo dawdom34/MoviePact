@@ -15,7 +15,10 @@
                             </button></a>
 							<div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
 								 <a class="dropdown-item" href="#">My tickets</a> 
-								 <a class="dropdown-item" href="{% url 'password_change' %}">Change password</a> 
+								 <a class="dropdown-item" href="{% url 'password_change' %}">Change password</a>
+								 <div class="dropdown-divider"></div>
+								 <a class="dropdown-item" href="{% url 'movies:create_movie' %}">+Add movie</a>
+								 <a class="dropdown-item" href="{% url 'movies:create_program' %}">+Add program</a>
 								<div class="dropdown-divider">
 								</div> <a class="dropdown-item" href="{% url 'logout' %}">Logout</a>
 							</div>

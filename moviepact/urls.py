@@ -19,7 +19,7 @@ from django.contrib.auth import views as auth_views
 from django.conf import settings
 from django.conf.urls.static import static
 
-from .views import home_page_view 
+from movies.views import homepage_view
 from users.views import login_view, register_view, logout_view
 
 urlpatterns = [
@@ -32,7 +32,7 @@ urlpatterns = [
     path('register/', register_view, name='register'),
 
     # Home page
-    path('', home_page_view, name='home'),
+    path('', homepage_view, name='home'),
 
     # Movies
     path('movies/', include('movies.urls', namespace='movies')),

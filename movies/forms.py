@@ -1,5 +1,5 @@
 from django import forms
-from .models import MovieModel
+from .models import MovieModel, ProgramModel
 
 
 class MovieCreationForm(forms.ModelForm):
@@ -13,7 +13,7 @@ class MovieCreationForm(forms.ModelForm):
     release_date = forms.DateField()
     direction = forms.CharField(max_length=200)
     script = forms.CharField(max_length=200)
-    poster = forms.ImageField(required=False)
+    poster = forms.ImageField(required=True)
 
     class Meta:
         model = MovieModel
@@ -31,3 +31,24 @@ class MovieCreationForm(forms.ModelForm):
         except MovieModel.DoesNotExist:
             return title
         raise forms.ValidationError(f'Movie with title "{title}" already exist!')
+    
+
+class ProgramCreationForm(forms.ModelForm):
+
+    date = forms.DateTimeField(widget=forms.DateTimeInput(format=r'%Y-%m-%d %H:%M:%S'),input_formats=[r'%Y-%m-%d %H:%M:%S'], help_text='YYYY-MM-DD HH:MM:SS')
+
+    class Meta:
+        model = ProgramModel
+        fields = ('movie', 'date', 'price')
+
+    def clean(self):
+        """
+        Check if given movie session at this time already exist
+        """
+        movie = self.cleaned_data['movie']
+        date = self.cleaned_data['date']
+        try:
+            program = ProgramModel.objects.get(movie=movie, date=date)
+        except ProgramModel.DoesNotExist:
+            return self.cleaned_data
+        raise forms.ValidationError('Program for this movie at this time already exist!')
