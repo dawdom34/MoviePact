@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import create_movie_view, create_program_view, homepage_view
+from .views import create_movie_view, create_program_view
 
 app_name = 'movies'
 

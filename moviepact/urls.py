@@ -31,7 +31,7 @@ urlpatterns = [
     path('logout/', logout_view, name='logout'),
     path('register/', register_view, name='register'),
 
-    # Home page
+    # Home page with no argument
     path('', homepage_view, name='home'),
 
     # Movies
