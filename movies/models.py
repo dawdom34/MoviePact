@@ -2,6 +2,7 @@ from django.db import models
 
 from users.models import UserModel
 
+#from embed_video.fields import EmbedVideoFiled
 
 def poster_filepath(self, *args, **kwargs):
     """
@@ -17,7 +18,7 @@ class MovieModel(models.Model):
     """
     title = models.CharField(unique=True, max_length=255)
     description = models.TextField()
-    trailer_link = models.CharField(max_length=255)
+    trailer_link = models.URLField()
     category = models.CharField(max_length=200)
     duration = models.IntegerField()
     age_category = models.SmallIntegerField()

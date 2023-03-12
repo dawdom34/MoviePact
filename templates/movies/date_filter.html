@@ -34,9 +34,6 @@
         content: " ";
     }
 
-    #today {
-        background-color: rgb(207, 207, 207);
-    }
 
     .movie-container {
         border: 1px solid red;
@@ -133,11 +130,13 @@
     .credits .card-body i {
         color: #8e24aa;
     }
+
     a {
-        color: black;
         text-decoration: none;
+        color: black;
     }
-    a:hover{
+
+    a:hover {
         color: black;
     }
 </style>
@@ -150,16 +149,21 @@
         <div class="col-md-8" id="dates">
 
             <div id="date-container">
-                <h2>Repertoire {{today.1}} {{today.0}}</h2>
-                <div class="date" id="today">
-                    <p>{{today.0}}</p><br>
-                    <p>{{today.1}}</p>
-                </div>
+                <p id="selected-date" style="display: none;">{{selected_date.0}}</p>
+                <h2>Repertoire {{selected_date.1}} {{selected_date.0}}</h2>
+                <a href="{% url 'movies:filter' date=today.2 %}">
+                    <div class="date" id="today">
+                        <p>{{today.0}}</p><br>
+                        <p>{{today.1}}</p>
+                    </div>
+                </a>
                 {% for x in days %}
-                <a href="{% url 'movies:filter' date=x.2 %}"><div class="date">
-                    <p>{{x.0}}</p><br>
-                    <p>{{x.1}}</p>
-                </div></a>
+                <a href="{% url 'movies:filter' date=x.2 %}">
+                    <div class="date" id="{{x.0}}">
+                        <p>{{x.0}}</p><br>
+                        <p>{{x.1}}</p>
+                    </div>
+                </a>
                 {% endfor %}
             </div>
         </div>
@@ -177,7 +181,7 @@
                 <div class="card movie_card">
                     <img src="{{x.movie.poster.url}}" class="card-img-top" alt="...">
                     <div class="card-body">
-                        
+
                         <h5 class="card-title">{{x.movie.title}}</h5>
                         <span class="movie_info">
                             <p>Release date: {{x.movie.release_date}}
@@ -196,5 +200,16 @@
     </div>
 
 </div>
+<script>
+    // Highlight selected date
+    try {
+        var date = document.getElementById('selected-date').innerHTML
+        var element = document.getElementById(date)
+        element.style.backgroundColor = '#cfcfcf'
+    } catch {
+        var element = document.getElementById('today')
+        element.style.backgroundColor = '#cfcfcf'
+    }
+</script>
 
 {% endblock %}

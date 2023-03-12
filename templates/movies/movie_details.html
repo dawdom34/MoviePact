@@ -1,0 +1,108 @@
+{% extends 'moviepact/base.html' %}
+{% load embed_video_tags %}
+
+{% block content %}
+
+<div class="container-fluid" style="padding-top: 100px;">
+    <div class="row">
+        <div class="col-md-2">
+        </div>
+        <div class="col-md-8 shaddow" style="background-color: rgb(202, 202, 202); border-radius:10px;">
+            <div class="row">
+                <div class="col-md-4">
+                    <img alt="Bootstrap Image Preview" style="width: 300px; padding-top:15px ;"
+                        src="{{seance.movie.poster.url}}" />
+                </div>
+                <div class="col-md-8">
+                    <h2 class="text-left" style="padding-top: 15px;">
+                        {{seance.movie.title}}
+                    </h2>
+                    <dl>
+
+                        <dt>
+                            Description
+                        </dt>
+                        <dd>
+                            <p id="description">{{seance.movie.description}}</p>
+                        </dd>
+                        <dt>
+                            Category
+                        </dt>
+                        <dd>
+                            <p id="category">{{seance.movie.category}}</p>
+                        </dd>
+                        <dt>Duration</dt>
+                        <dd>
+                            <p>{{seance.movie.duration}} min.</p>
+                        </dd>
+                        <dt>
+                            Age category
+                        </dt>
+                        <dd>
+                            {{seance.movie.age_category}}
+                        </dd>
+                        <dt>
+                            Cast
+                        </dt>
+                        <dd>
+                            {{seance.movie.cast}}
+                        </dd>
+                        <dt>
+                            Premiere
+                        </dt>
+                        <dd>
+                            {{seance.movie.release_date}}
+                        </dd>
+                        <dt>
+                            Direction
+                        </dt>
+                        <dd>
+                            {{seance.movie.direction}}
+                        </dd>
+                        <dt>
+                            Script
+                        </dt>
+                        <dd>
+                            {{seance.movie.script}}
+                        </dd>
+                        <dt>
+                            Price
+                        </dt>
+                        <dd>
+                            {{seance.price}}$
+                        </dd>
+                        <dt></dt>
+                        <dd>
+                        {% if not tickets_sold_out %}
+                        <a href="{% url 'movies:buy_ticket' seance_id=seance.id %}"><button type="button" class="btn btn-warning">
+                            Buy a ticket
+                        </button></a>
+                        {% else %}
+                        <button type="button" class="btn btn-warning disabled">
+                            Tickets sold out
+                        </button>
+                        {% endif %}
+                        </dd>
+
+                    </dl>
+                </div>
+            </div>
+            
+        </div>
+        <div class="col-md-2">
+        </div>
+    </div>
+    <div class="row" style="height: 600px; margin-top: 50px;">
+        <div class="col-md-2">
+        </div>
+        <div class="col-md-8" style="background-color: rgb(202, 202, 202); border-radius:10px; position: relative; text-align: center;">
+            <h2>Watch trailer</h2>
+            <div id="trailer-container" style="position: absolute; left: 25%; margin-top: 10px;">
+                {% video seance.movie.trailer_link 'medium'%}
+            </div>
+        </div>
+        <div class="col-md-2">
+        </div>
+    </div>
+</div>
+{% endblock %}

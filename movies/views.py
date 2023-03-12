@@ -1,8 +1,9 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
+import json
 
 from .forms import MovieCreationForm, ProgramCreationForm
-from .models import ProgramModel
+from .models import ProgramModel, SeatsModel, TicketsModel
 
 from datetime import datetime, timedelta
 
@@ -64,16 +65,19 @@ def create_program_view(request):
     return render(request, 'movies/create_program.html', context)
 
 def homepage_view(request):
+    """
+    Get todays movie sessions
+    """
     context = {}
 
     if request.method == "GET":
         # Todays date
-        today = (datetime.now().strftime(r'%m-%d'), datetime.now().strftime(r'%A'))
+        today = (datetime.now().strftime(r'%m-%d'), datetime.now().strftime(r'%A'), datetime.now().strftime(r'%Y-%m-%d'))
         days = []
         # Dates for next 14 days
         for x in range(1,14):
             next = datetime.now() + timedelta(days=x)
-            days.append((next.strftime(r'%m-%d'), next.strftime(r'%A')))
+            days.append((next.strftime(r'%m-%d'), next.strftime(r'%A'), next.strftime(r'%Y-%m-%d')))
         # Get the movies from today session
         program = ProgramModel.objects.filter(date__date=datetime.now().strftime(r'%Y-%m-%d'))
         context['program'] = program
@@ -82,3 +86,126 @@ def homepage_view(request):
     else:
         pass
     return render(request, 'movies/home_page_beta.html', context)
+
+def date_filter_view(request, *args, **kwargs):
+    """
+    Get movie sessions for selected day
+    """
+    context = {}
+
+    if request.method == 'GET':
+        # Todays date
+        today = (datetime.now().strftime(r'%m-%d'), datetime.now().strftime(r'%A'), datetime.now().strftime(r'%Y-%m-%d'))
+        days = []
+        # Dates for next 14 days
+        for x in range(1,14):
+            next = datetime.now() + timedelta(days=x)
+            days.append((next.strftime(r'%m-%d'), next.strftime(r'%A'), next.strftime(r'%Y-%m-%d')))
+        # Get the movies from selected date
+        date = kwargs.get('date')
+        selected_date = datetime(year=int(date[0:4]), month=int(date[5:7]), day=int(date[8:]))
+        program = ProgramModel.objects.filter(date__date=date)
+
+        context['program'] = program
+        context['today'] = today
+        context['days'] = days
+        context['selected_date'] = (selected_date.strftime(r'%m-%d'), selected_date.strftime(r'%A'))
+
+    return render(request, 'movies/date_filter.html', context)
+
+def movie_details_view(request, *args, **kwargs):
+    """
+    Get seance details
+    """
+    context = {}
+
+    if request.method == 'GET':
+        # Get seance id from url
+        seance_id = kwargs.get('seance_id')
+        # Get seance object with given id
+        seance = ProgramModel.objects.get(id=seance_id)
+
+        # check if the seance has vacancies
+        # Get taken seats for given seance
+        seats = SeatsModel.objects.filter(program=seance)
+        taken_seats = ''
+        # Append all seats numbers to the string
+        for x in seats:
+            taken_seats += x.seats_numbers + ','
+        # Convert string to array
+        taken_seats_arr = taken_seats.split(',')
+        # Delete last argument from array, it's empty string
+        taken_seats_arr.pop(-1)
+        # Check if the length of array is equal 48 (the cinema hall has 48 seats available)
+        if len(taken_seats_arr) == 48:
+            tickets_sold_out = True
+        else:
+            tickets_sold_out = False
+
+        context['seance'] = seance
+        context['tickets_sold_out'] = tickets_sold_out
+
+    return render(request, 'movies/movie_details.html', context)
+
+def buy_ticket_view(request, *args, **kwargs):
+    """
+    Choose a seats and create a ticket
+    """
+    context = {}
+
+    if request.method == 'GET':
+        # Get seance id from url
+        seance_id = kwargs.get('seance_id')
+        # Get seance object with given id
+        seance = ProgramModel.objects.get(id=seance_id)
+        try:
+            # Get taken seats for the seance
+            seats = SeatsModel.objects.filter(program=seance)
+            taken_seats = ''
+            for seat_number in seats:
+                taken_seats += seat_number.seats_numbers + ','
+        except SeatsModel.DoesNotExist:
+            taken_seats = []
+
+        context['seance'] = seance
+        context['taken_seats'] = taken_seats[0:-1]
+
+    return render(request, 'movies/buy_ticket.html', context)
+
+def create_ticket_view(request):
+    """
+    Create a ticket after user buy it
+    """
+    payload = {}
+    user = request.user
+
+    if request.method == 'POST' and user.is_authenticated:
+        # Get data from request
+        program_id = request.POST.get('program_id')
+        seats = request.POST.get('seats')
+        # Check if program with given id exist
+        try:
+            program = ProgramModel.objects.get(id=program_id)
+
+            # Check if given seats are avialable
+            try:
+                for seat in seats.split(','):
+                    # If seat is already occupied
+                    s = SeatsModel.objects.get(seats_numbers__contains=seat)
+                    if len(seats.split(',')) > 1:
+                        payload['response'] = 'One of the selected seats is already occupied.'
+                    else:
+                        payload['response'] = 'This place is already taken.'
+            except SeatsModel.DoesNotExist:
+                # Seats are avialble
+                # Create seats object
+                reserved_seats = SeatsModel.objects.create(program=program, seats_numbers=seats)
+                # Create ticket
+                TicketsModel.objects.create(program=program, user=user, seats=reserved_seats)
+                payload['response'] = 'Ticket created.'
+        except:
+            payload['response'] = 'Given seance does not exist!'
+    else:
+        payload['response'] = 'You must be authenticated to buy a ticket.'
+    
+    return HttpResponse(json.dumps(payload))
