@@ -4,6 +4,7 @@ import json
 
 from .forms import MovieCreationForm, ProgramCreationForm
 from .models import ProgramModel, SeatsModel, TicketsModel
+from .utils import check_if_refundable
 
 from datetime import datetime, timedelta
 
@@ -152,6 +153,7 @@ def buy_ticket_view(request, *args, **kwargs):
     Choose a seats and create a ticket
     """
     context = {}
+    user = request.user
 
     if request.method == 'GET':
         # Get seance id from url
@@ -165,10 +167,23 @@ def buy_ticket_view(request, *args, **kwargs):
             for seat_number in seats:
                 taken_seats += seat_number.seats_numbers + ','
         except SeatsModel.DoesNotExist:
-            taken_seats = []
+            taken_seats = ''
+
+        # Get seats reserved by authenticated user
+        try:
+            # Get ticket for given seance and user
+            tickets = TicketsModel.objects.filter(program=seance, user=user)
+            # Append seats reserved by user
+            reserved_seats = ''
+            for ticket in tickets:
+                reserved_seats += ticket.seats.seats_numbers + ','
+        except TicketsModel.DoesNotExist:
+            reserved_seats = ''
+
 
         context['seance'] = seance
         context['taken_seats'] = taken_seats[0:-1]
+        context['reserved_seats'] = reserved_seats[0:-1]
 
     return render(request, 'movies/buy_ticket.html', context)
 
@@ -183,9 +198,11 @@ def create_ticket_view(request):
         # Get data from request
         program_id = request.POST.get('program_id')
         seats = request.POST.get('seats')
+        print(program_id)
+        print(seats)
         # Check if program with given id exist
         try:
-            program = ProgramModel.objects.get(id=program_id)
+            program = ProgramModel.objects.get(id=int(program_id))
 
             # Check if given seats are avialable
             try:
@@ -198,14 +215,74 @@ def create_ticket_view(request):
                         payload['response'] = 'This place is already taken.'
             except SeatsModel.DoesNotExist:
                 # Seats are avialble
-                # Create seats object
-                reserved_seats = SeatsModel.objects.create(program=program, seats_numbers=seats)
-                # Create ticket
-                TicketsModel.objects.create(program=program, user=user, seats=reserved_seats)
-                payload['response'] = 'Ticket created.'
-        except:
+                try:
+                    # Check if the user has already booked seats for this seance, if so, add new seats to the existing ticket
+                    ticket = TicketsModel.objects.get(program=program, user=user)
+                    # Get the seats object for given seanse
+                    users_seats = SeatsModel.objects.get(id=ticket.seats.id)
+                    # Add new seats to the seats object
+                    new_seats = str(users_seats) + ',' + seats
+                    users_seats.seats_numbers = new_seats
+                    users_seats.save()
+                except TicketsModel.DoesNotExist:
+                    # Create seats object
+                    reserved_seats = SeatsModel.objects.create(program=program, seats_numbers=seats)
+                    # Create ticket
+                    TicketsModel.objects.create(program=program, user=user, seats=reserved_seats)
+                    payload['response'] = 'Ticket created.'
+        except ProgramModel.DoesNotExist:
             payload['response'] = 'Given seance does not exist!'
     else:
         payload['response'] = 'You must be authenticated to buy a ticket.'
     
     return HttpResponse(json.dumps(payload))
+
+def tickets_view(request):
+    """
+    View all tickets of authenticated user
+    """
+    context = {}
+    user = request.user
+
+    if request.method == 'GET':
+        user_tickets = TicketsModel.objects.filter(user=user)
+        tickets = []
+        # Combine tickets with information about refund
+        for ticket in user_tickets:
+            tickets.append((ticket, check_if_refundable(ticket.id)))
+
+        context['tickets'] = tickets
+    
+    return render(request, 'movies/tickets.html', context)
+
+def return_ticket_view(request):
+    """
+    Return the ticket
+    """
+    paylod = {}
+    user = request.user
+
+    if request.method == 'POST' and user.is_authenticated:
+        # Get ticket id from request
+        ticket_id = request.POST.get('ticket_id')
+        try:
+            ticket = TicketsModel.objects.get(id=int(ticket_id))
+            # Confirm that the ticket belong to authenticated user
+            if ticket.user == user:
+                # Check if ticket is refundable
+                if check_if_refundable(ticket_id):
+                    # Delete seats and ticket
+                    seats = SeatsModel.objects.get(id=ticket.seats.id)
+                    seats.delete()
+                    ticket.delete()
+                    paylod['response'] = 'Ticket returned.'
+                else:
+                    paylod['response'] = 'You cannot return this ticket.'
+            else:
+                paylod['response'] = "You cannot return someone else's ticket."
+        except TicketsModel.DoesNotExist:
+            paylod['response'] = 'Ticket does not exist.'
+    else:
+        paylod['response'] = 'You must be authenticated to return ticket.'
+    
+    return HttpResponse(json.dumps(paylod))

@@ -36,7 +36,7 @@ class ProgramModel(models.Model):
     """
     Sessions set for a specific day and time
     """
-    movie = models.ForeignKey(MovieModel, on_delete=models.RESTRICT)
+    movie = models.ForeignKey(MovieModel, on_delete=models.CASCADE)
     date = models.DateTimeField()
     price = models.FloatField()
 
@@ -48,7 +48,7 @@ class SeatsModel(models.Model):
     """
     Seat reservation
     """
-    program = models.ForeignKey(ProgramModel, on_delete=models.RESTRICT)
+    program = models.ForeignKey(ProgramModel, on_delete=models.CASCADE)
     seats_numbers = models.CharField(max_length=100)
 
     def __str__(self) -> str:
@@ -59,6 +59,6 @@ class TicketsModel(models.Model):
     """
     Tickets
     """
-    program = models.ForeignKey(ProgramModel, on_delete=models.RESTRICT)
-    user = models.ForeignKey(UserModel, on_delete=models.RESTRICT)
+    program = models.ForeignKey(ProgramModel, on_delete=models.CASCADE)
+    user = models.ForeignKey(UserModel, on_delete=models.CASCADE)
     seats = models.ForeignKey(SeatsModel, on_delete=models.CASCADE)

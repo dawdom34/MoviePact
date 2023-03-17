@@ -1,19 +1,18 @@
 <script type="text/javascript">
-	function sendTicketData(program_id, seats, uiUpdateFunction){
+	function returnTicket(ticket_id, uiUpdateFunction){
 		payload = {
 			"csrfmiddlewaretoken": "{{ csrf_token }}",
-			"program_id": program_id,
-            "seats": seats
+			"ticket_id": ticket_id
 		}
 		$.ajax({
 			type: 'POST',
 			dataType: "json",
-			url: "{% url 'movies:create_ticket' %}",
+			url: "{% url 'movies:return_ticket' %}",
 			data: payload,
 			timeout: 5000,
 			success: function(data) {
 				console.log("SUCCESS", data)
-				if(data['response'] == "Ticket created."){
+				if(data['response'] == "Ticket returned."){
 					// ui is updated
 				}
 				else if(data['response'] != null){
@@ -29,4 +28,8 @@
 			}
 		});
 	}
+
+    function uiUpdateFunction(){
+        document.location.reload();
+    }
 </script>
