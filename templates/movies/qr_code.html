@@ -1,0 +1,38 @@
+{% extends 'moviepact/base.html' %}
+{% load qr_code %}
+
+{% block content %}
+
+<style>
+    .parent{
+        position: relative;
+    }
+    .child{
+        position: absolute;
+        top: 50%;
+        left: 25%;
+        
+    }
+</style>
+
+<div class="container-fluid">
+	<div class="row">
+		<div class="col-md-12">
+			<div class="row" style="padding-top: 100px;">
+				<div class="col-md-2">
+				</div>
+				<div class="col-md-8 parent">
+                    <div class="child">
+						<img src="{% qr_url_from_text '{{qr_code_info}}' size='s' image_format='png' %}">
+                        
+                    </div>
+				</div>
+				<div class="col-md-2">
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+{% endblock %}

@@ -48,6 +48,9 @@ urlpatterns = [
         template_name='password_reset/password_reset_complete.html'), name='password_reset_complete'),
     path('password_reset/done/', auth_views.PasswordResetCompleteView.as_view(
         template_name='password_reset/password_reset_done.html'), name='password_reset_done'),
+
+    # QR code
+    path('qr_code/', include('qr_code.urls', namespace='qr_code'),)
 ]
 
 if settings.DEBUG:

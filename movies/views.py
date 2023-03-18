@@ -286,3 +286,27 @@ def return_ticket_view(request):
         paylod['response'] = 'You must be authenticated to return ticket.'
     
     return HttpResponse(json.dumps(paylod))
+
+def load_qr_code_view(request, *args, **kwargs):
+    """
+    Create qr code and show it to user
+    """
+    context = {}
+    user = request.user
+
+    if request.method == 'GET':
+        ticket_id = kwargs.get('ticket_id')
+        # Check if ticket with given id exist
+        try:
+            ticket = TicketsModel.objects.get(id=ticket_id)
+            # Check if the ticket belongs to authenticated user
+            if ticket.user == user:
+                qr_code_info = f'{ticket.id}/{ticket.program.id}/{ticket.user.id}'
+                context['qr_code_info'] = qr_code_info
+            else:
+                raise ValueError('This ticket does not belong to you')
+
+        except TicketsModel.DoesNotExist:
+            raise ValueError('This ticket does not exist.')
+    
+    return render(request, 'movies/qr_code.html', context)

@@ -1,4 +1,5 @@
 {% extends 'moviepact/base.html' %}
+{% load qr_code %}
 
 
 {% block content %}
@@ -73,10 +74,10 @@
                                             <span style="font-size: small;">QR code</span>
                                         </span>
                                     </div>
-                                    <a href="" target="_blank" class="btn btn-sm btn-outline-success btn-block">
+                                    <a href="{% url 'movies:qr_code' ticket_id=ticket.0.id %}" target="_blank" class="btn btn-sm btn-outline-success btn-block">
                                         Load QR code
                                     </a>
-                                    <a href="" target="_blank" class="btn btn-sm btn-outline-success btn-block">
+                                    <a href="{% qr_url_from_text '{{ticket.0.id}}/{{ticket.0.program.id}}/{{ticket.0.user.id}}' size='s' image_format='png' %}" target="_blank" class="btn btn-sm btn-outline-success btn-block" download="Ticket_{{ticket.0.program.movie.title}}">
                                         Download QR code
                                     </a>
                                 </div>
