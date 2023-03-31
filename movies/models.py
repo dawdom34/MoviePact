@@ -2,9 +2,8 @@ from django.db import models
 
 from users.models import UserModel
 
-#from embed_video.fields import EmbedVideoFiled
 
-def poster_filepath(self, *args, **kwargs):
+def poster_filepath(self, *args, **kwargs): # pragma: no cover
     """
     Posters upload path
     """
@@ -26,7 +25,7 @@ class MovieModel(models.Model):
     release_date = models.DateField()
     direction = models.CharField(max_length=200)
     script = models.CharField(max_length=200)
-    poster = models.ImageField(upload_to=poster_filepath)
+    poster = models.ImageField(upload_to=poster_filepath, default='default-movie-poster.jpg')
 
     def __str__(self) -> str:
         return self.title

@@ -5,34 +5,26 @@
 
 <style>
     .parent{
-        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 500px;
+        width: 500px;
+        padding-top: 100px;
     }
     .child{
-        position: absolute;
-        top: 50%;
-        left: 25%;
+        width: 300px;
+        height: 300px;
         
     }
 </style>
 
-<div class="container-fluid">
-	<div class="row">
-		<div class="col-md-12">
-			<div class="row" style="padding-top: 100px;">
-				<div class="col-md-2">
-				</div>
-				<div class="col-md-8 parent">
-                    <div class="child">
-						<img src="{% qr_url_from_text '{{qr_code_info}}' size='s' image_format='png' %}">
-                        
-                    </div>
-				</div>
-				<div class="col-md-2">
-				</div>
-			</div>
+
+		<div class="parent">
+			<div class="child"><img src="{% qr_url_from_text '{{qr_code_info}}' size='m' image_format='png' %}"></div>
+			
 		</div>
-	</div>
-</div>
+
 
 
 {% endblock %}

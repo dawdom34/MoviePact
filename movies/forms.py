@@ -13,8 +13,8 @@ class MovieCreationForm(forms.ModelForm):
     release_date = forms.DateField()
     direction = forms.CharField(max_length=200)
     script = forms.CharField(max_length=200)
-    poster = forms.ImageField(required=True)
-
+    poster = forms.ImageField(required=False, initial='default-movie-poster.jpg')
+    
     class Meta:
         model = MovieModel
         fields = ('title', 'description', 'trailer_link', 'category', 'duration',

@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
+from django.contrib.auth.decorators import login_required
 import json
 
 from .forms import MovieCreationForm, ProgramCreationForm
@@ -22,7 +23,7 @@ def create_movie_view(request):
     
     # Check if user has staff privileges
     if not user.is_staff:
-        return HttpResponse('Acces denied!')
+        return HttpResponse('Access denied!')
     
     if request.POST:
         form = MovieCreationForm(request.POST, request.FILES)
@@ -50,7 +51,7 @@ def create_program_view(request):
     
     # Check if user has staff privileges
     if not user.is_staff:
-        return HttpResponse('Acces denied!')
+        return HttpResponse('Access denied!')
     
     if request.POST:
         form = ProgramCreationForm(request.POST)
@@ -84,8 +85,7 @@ def homepage_view(request):
         context['program'] = program
         context['today'] = today
         context['days'] = days
-    else:
-        pass
+
     return render(request, 'movies/home_page_beta.html', context)
 
 def date_filter_view(request, *args, **kwargs):
@@ -124,7 +124,10 @@ def movie_details_view(request, *args, **kwargs):
         # Get seance id from url
         seance_id = kwargs.get('seance_id')
         # Get seance object with given id
-        seance = ProgramModel.objects.get(id=seance_id)
+        try:
+            seance = ProgramModel.objects.get(id=seance_id)
+        except ProgramModel.DoesNotExist:
+            return HttpResponse('Seance with given id does not exist.')
 
         # check if the seance has vacancies
         # Get taken seats for given seance
@@ -148,6 +151,7 @@ def movie_details_view(request, *args, **kwargs):
 
     return render(request, 'movies/movie_details.html', context)
 
+@login_required(login_url='login')
 def buy_ticket_view(request, *args, **kwargs):
     """
     Choose a seats and create a ticket
@@ -159,26 +163,27 @@ def buy_ticket_view(request, *args, **kwargs):
         # Get seance id from url
         seance_id = kwargs.get('seance_id')
         # Get seance object with given id
-        seance = ProgramModel.objects.get(id=seance_id)
         try:
-            # Get taken seats for the seance
-            seats = SeatsModel.objects.filter(program=seance)
-            taken_seats = ''
+            seance = ProgramModel.objects.get(id=seance_id)
+        except ProgramModel.DoesNotExist:
+            return HttpResponse('Seance with given id does not exist.')
+        
+        # Get taken seats for the seance
+        seats = SeatsModel.objects.filter(program=seance)
+        taken_seats = ''
+        if len(seats) > 0:
             for seat_number in seats:
                 taken_seats += seat_number.seats_numbers + ','
-        except SeatsModel.DoesNotExist:
-            taken_seats = ''
+        
 
         # Get seats reserved by authenticated user
-        try:
-            # Get ticket for given seance and user
-            tickets = TicketsModel.objects.filter(program=seance, user=user)
+        tickets = TicketsModel.objects.filter(program=seance, user=user)
+        reserved_seats = ''
+        if len(tickets)  > 0:
             # Append seats reserved by user
-            reserved_seats = ''
             for ticket in tickets:
                 reserved_seats += ticket.seats.seats_numbers + ','
-        except TicketsModel.DoesNotExist:
-            reserved_seats = ''
+        
 
 
         context['seance'] = seance
@@ -198,8 +203,6 @@ def create_ticket_view(request):
         # Get data from request
         program_id = request.POST.get('program_id')
         seats = request.POST.get('seats')
-        print(program_id)
-        print(seats)
         # Check if program with given id exist
         try:
             program = ProgramModel.objects.get(id=int(program_id))
@@ -224,6 +227,7 @@ def create_ticket_view(request):
                     new_seats = str(users_seats) + ',' + seats
                     users_seats.seats_numbers = new_seats
                     users_seats.save()
+                    payload['response'] = 'Ticket created.'
                 except TicketsModel.DoesNotExist:
                     # Create seats object
                     reserved_seats = SeatsModel.objects.create(program=program, seats_numbers=seats)
@@ -237,6 +241,7 @@ def create_ticket_view(request):
     
     return HttpResponse(json.dumps(payload))
 
+@login_required(login_url='login')
 def tickets_view(request):
     """
     View all tickets of authenticated user
@@ -245,7 +250,7 @@ def tickets_view(request):
     user = request.user
 
     if request.method == 'GET':
-        user_tickets = TicketsModel.objects.filter(user=user)
+        user_tickets = TicketsModel.objects.filter(user=user, program__date__date__gte=datetime.now().date())
         tickets = []
         # Combine tickets with information about refund
         for ticket in user_tickets:
@@ -279,7 +284,7 @@ def return_ticket_view(request):
                 else:
                     paylod['response'] = 'You cannot return this ticket.'
             else:
-                paylod['response'] = "You cannot return someone else's ticket."
+                paylod['response'] = "Error while returning the ticket."
         except TicketsModel.DoesNotExist:
             paylod['response'] = 'Ticket does not exist.'
     else:
@@ -287,6 +292,7 @@ def return_ticket_view(request):
     
     return HttpResponse(json.dumps(paylod))
 
+@login_required(login_url='login')
 def load_qr_code_view(request, *args, **kwargs):
     """
     Create qr code and show it to user
@@ -304,9 +310,9 @@ def load_qr_code_view(request, *args, **kwargs):
                 qr_code_info = f'{ticket.id}/{ticket.program.id}/{ticket.user.id}'
                 context['qr_code_info'] = qr_code_info
             else:
-                raise ValueError('This ticket does not belong to you')
+                return HttpResponse('Error while loading QR code.')
 
         except TicketsModel.DoesNotExist:
-            raise ValueError('This ticket does not exist.')
+            return HttpResponse('This ticket does not exist.')
     
     return render(request, 'movies/qr_code.html', context)
