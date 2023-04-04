@@ -14,10 +14,12 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from django.contrib.auth import views as auth_views
+from django.conf import settings
+from django.conf.urls.static import static
 
-from .views import home_page_view 
+from movies.views import homepage_view
 from users.views import login_view, register_view, logout_view
 
 urlpatterns = [
@@ -29,8 +31,11 @@ urlpatterns = [
     path('logout/', logout_view, name='logout'),
     path('register/', register_view, name='register'),
 
-    # Home page
-    path('', home_page_view, name='home'),
+    # Home page with no argument
+    path('', homepage_view, name='home'),
+
+    # Movies
+    path('movies/', include('movies.urls', namespace='movies')),
 
     # Password change
     path('password_change/', auth_views.PasswordChangeView.as_view(template_name='password_reset/password_change.html'), name='password_change'),
@@ -43,4 +48,11 @@ urlpatterns = [
         template_name='password_reset/password_reset_complete.html'), name='password_reset_complete'),
     path('password_reset/done/', auth_views.PasswordResetCompleteView.as_view(
         template_name='password_reset/password_reset_done.html'), name='password_reset_done'),
+
+    # QR code
+    path('qr_code/', include('qr_code.urls', namespace='qr_code'),)
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

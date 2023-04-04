@@ -1,0 +1,32 @@
+<script type="text/javascript">
+	function sendTicketData(program_id, seats, uiUpdateFunction){
+		payload = {
+			"csrfmiddlewaretoken": "{{ csrf_token }}",
+			"program_id": program_id,
+            "seats": seats
+		}
+		$.ajax({
+			type: 'POST',
+			dataType: "json",
+			url: "{% url 'movies:create_ticket' %}",
+			data: payload,
+			timeout: 5000,
+			success: function(data) {
+				console.log("SUCCESS", data)
+				if(data['response'] == "Ticket created."){
+					// ui is updated
+				}
+				else if(data['response'] != null){
+					alert(data['response'])
+				}
+			},
+			error: function(data) {
+				console.error("ERROR...", data)
+				//alert("Something went wrong.")
+			},
+			complete: function(data){
+				uiUpdateFunction()
+			}
+		});
+	}
+</script>

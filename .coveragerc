@@ -1,5 +1,5 @@
 [run]
-source = users/
+source = users/, movies/
 omit=
     venv
     */apps.py
@@ -8,3 +8,5 @@ omit=
     */migrations/*
     *__init__.py
     */backends.py
+exclude_lines=
+    pragma: no cover

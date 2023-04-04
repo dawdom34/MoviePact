@@ -1,0 +1,98 @@
+{% extends 'moviepact/base.html' %}
+{% load qr_code %}
+
+
+{% block content %}
+
+<style>
+    .coupon .kanan {
+    border-left: 1px dashed #ddd;
+    width: 40% !important;
+    position:relative;
+}
+
+.coupon .kanan .info::after, .coupon .kanan .info::before {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background: #dedede;
+    border-radius: 100%;
+}
+.coupon .kanan .info::before {
+    top: -10px;
+    left: -10px;
+}
+
+.coupon .kanan .info::after {
+    bottom: -10px;
+    left: -10px;
+}
+.coupon .time {
+    font-size: 1.6rem;
+}
+</style>
+
+
+<div class="container-fluid">
+	<div class="row">
+		<div class="col-md-2">
+		</div>
+		<div class="col-md-8">
+            <div class="row" style="margin-top: 100px;">
+                {% for ticket in tickets %}
+                <div class="col-sm-6">
+                    <div class="coupon bg-white rounded mb-3 d-flex justify-content-between">
+                        <div class="kiri p-3">
+                            <div class="icon-container ">
+                                <div class="icon-container_box">
+                                    <img src="{{ticket.0.program.movie.poster.url}}" width="120" height="200">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tengah py-3 d-flex w-100 justify-content-start">
+                            <div>
+                                <span class="badge badge-success">Ticket</span>
+                                <h3 class="lead">{{ticket.0.program.movie.title}}</h3>
+                                <p class="text-muted mb-0">Seance date: {{ticket.0.program.date}}</p>
+                                <p class="text-muted mb-0">Seats(row-seat): {{ticket.0.seats.seats_numbers}}</p>
+                            </div>
+                        </div>
+                        <div class="kanan">
+                            <div class="info m-3 d-flex align-items-center">
+                                <div class="w-100">
+                                    <div class="block">
+                                        <span class="time font-weight-light">
+                                            <span style="font-size: small;">Return the ticket</span>
+                                        </span>
+                                    </div>
+                                    <a href="" class="btn btn-sm btn-outline-danger btn-block {% if ticket.1 == False %} disabled {% endif %}" onclick="returnTicket('{{ticket.0.id}}', uiUpdateFunction)">
+                                        Return
+                                    </a>
+                                    <div class="block">
+                                        <span class="time font-weight-light">
+                                            <span style="font-size: small;">QR code</span>
+                                        </span>
+                                    </div>
+                                    <a href="{% url 'movies:qr_code' ticket_id=ticket.0.id %}" target="_blank" class="btn btn-sm btn-outline-success btn-block">
+                                        Load QR code
+                                    </a>
+                                    <a href="{% qr_url_from_text '{{ticket.0.id}}/{{ticket.0.program.id}}/{{ticket.0.user.id}}' size='s' image_format='png' %}" target="_blank" class="btn btn-sm btn-outline-success btn-block" download="Ticket_{{ticket.0.program.movie.title}}">
+                                        Download QR code
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+		</div>
+		<div class="col-md-2">
+		</div>
+	</div>
+</div>
+
+{% include 'movies/snippets/return_ticket.html' %}
+
+{% endblock %}

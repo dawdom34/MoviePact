@@ -1,0 +1,22 @@
+{% extends 'moviepact/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container-fluid" style="padding-top: 100px; padding-bottom: 100px; ">
+	<div class="row">
+		<div class="col-md-3">
+		</div>
+		<div class="col-md-6" style="background-color:white">
+			<h1 style="text-align: center;">Add a new movie session</h1>
+			<form method="POST" enctype='multipart/form-data'>{% csrf_token %}
+				{{form|crispy}}
+				<button type="submit" class="btn btn-warning" style="margin-top: 25px; margin-bottom: 25px;">
+                    + add
+                </button>
+			</form>
+		</div>
+		<div class="col-md-3">
+		</div>
+	</div>
+</div>
+{% endblock %}
