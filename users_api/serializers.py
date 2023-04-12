@@ -22,6 +22,7 @@ class RegisterSerializer(serializers.ModelSerializer):
       'email': {'required': True}
     }
 
+  # Password validation
   def validate(self, attrs):
     if attrs['password'] != attrs['password2']:
       raise serializers.ValidationError(
@@ -37,8 +38,16 @@ class RegisterSerializer(serializers.ModelSerializer):
     return user
 
 
-class UserSerializer(serializers.ModelSerializer):
-
+class UserLoginSerializer(serializers.ModelSerializer):
+  email = serializers.EmailField(
+    required=True,
+  )
   class Meta:
     model = UserModel
-    fields = ('id', 'email', 'password')
+    fields = ('email', 'password')
+
+
+class UserSerializer(serializers.ModelSerializer):
+  class Meta:
+    model = UserModel
+    fields = ('id', 'email')

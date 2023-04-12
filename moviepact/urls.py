@@ -27,7 +27,7 @@ from movies.views import homepage_view
 
 from users.views import login_view, register_view, logout_view
 
-from users_api.views import UserViewSet
+
 
 urlpatterns = [
     # Admin
@@ -39,8 +39,8 @@ urlpatterns = [
     path('register/', register_view, name='register'),
 
     # API user authentication
-    path('api/', include('users_api.urls', namespace='users_api')),
-    path('api-auth/', include('rest_framework.urls')),
+    path('users_api/', include('users_api.urls', namespace='users_api')),
+    # path('api-auth/', include('rest_framework.urls')),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 
@@ -66,10 +66,6 @@ urlpatterns = [
     path('qr_code/', include('qr_code.urls', namespace='qr_code'),)
 ]
 
-router = DefaultRouter()
-router.register('user', UserViewSet, basename='user')
-
-urlpatterns += router.urls
 
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
