@@ -30,9 +30,10 @@ ALLOWED_HOSTS = []
 
 AUTH_USER_MODEL = 'users.UserModel'
 
-# Backend for case insensitive email
+
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.AllowAllUsersModelBackend',
+    # Backend for case insensitive email
     'users.backends.CaseInsensitiveModelBackend'
 ]
 
@@ -70,6 +71,9 @@ CORS_ALLOWED_ORIGINS = [
     'http://127.0.0.1:8000',
     'http://localhost:8000'
 ]
+
+# 900 sec = 15min
+PASSWORD_RESET_TIMEOUT = 900
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
