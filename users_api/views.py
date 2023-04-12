@@ -88,3 +88,8 @@ class PasswordResetAPIView(APIView):
         if serializer.is_valid():
             return Response({'msg': 'Password reset successfully'}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+class LogoutUserAPIView(APIView):
+    def post(self, request):
+        request.user.auth_token.delete()
+        return Response({'msg': 'Logout successfully'}, status=status.HTTP_200_OK)

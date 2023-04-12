@@ -4,7 +4,8 @@ from .views import (RegisterUserAPIView,
                     UserProfileView, 
                     UserChangePasswordAPIView,
                     SendPasswordResetEmailAPIView,
-                    PasswordResetAPIView)
+                    PasswordResetAPIView,
+                    LogoutUserAPIView)
 
 
 app_name = 'users_api'
@@ -12,6 +13,7 @@ app_name = 'users_api'
 urlpatterns = [
   path('register',RegisterUserAPIView.as_view(), name='register'),
   path('login', LoginUserAPIView.as_view(), name='login'),
+  path('logout', LogoutUserAPIView.as_view(), name='logout'),
   path('profile', UserProfileView.as_view(), name='profile'),
   path('change_password', UserChangePasswordAPIView.as_view(), name='change_password'),
   path('send-reset-password-email', SendPasswordResetEmailAPIView.as_view(), name='send-reset-password-email'),
