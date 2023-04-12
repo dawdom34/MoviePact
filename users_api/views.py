@@ -1,4 +1,4 @@
-from .serializers import RegisterSerializer, UserLoginSerializer, UserSerializer
+from .serializers import RegisterSerializer, UserLoginSerializer, UserSerializer, UserChangePasswordSerializer
 
 from django.contrib.auth import authenticate
 
@@ -47,10 +47,21 @@ class LoginUserAPIView(APIView):
             else:
                 return Response({'errors':{'non field errors': ['Email or Password is not valid']}}, status=status.HTTP_404_NOT_FOUND)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
 
+
+# Class based view to get user data
 class UserProfileView(APIView):
     permission_classes = [IsAuthenticated]
     def get(self, request):
         serializer = UserSerializer(request.user)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+
+# Class based view to change users password
+class UserChangePasswordAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    def post(self, request):
+        serializer = UserChangePasswordSerializer(data=request.data, context={'user': request.user})
+        if serializer.is_valid():
+            return Response({'msg': 'Password changed successfully'}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
