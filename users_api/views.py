@@ -90,6 +90,9 @@ class PasswordResetAPIView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 class LogoutUserAPIView(APIView):
+    permission_classes = [IsAuthenticated]
     def post(self, request):
-        request.user.auth_token.delete()
-        return Response({'msg': 'Logout successfully'}, status=status.HTTP_200_OK)
+        refresh_token = request.data['refresh_token']
+        token = RefreshToken(refresh_token)
+        token.blacklist()
+        return Response({'msg': 'Logout successfully'}, status=status.HTTP_205_RESET_CONTENT)
