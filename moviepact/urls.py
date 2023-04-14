@@ -19,8 +19,15 @@ from django.contrib.auth import views as auth_views
 from django.conf import settings
 from django.conf.urls.static import static
 
+from rest_framework.routers import DefaultRouter
+
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+
 from movies.views import homepage_view
+
 from users.views import login_view, register_view, logout_view
+
+
 
 urlpatterns = [
     # Admin
@@ -30,6 +37,12 @@ urlpatterns = [
     path('login/', login_view, name='login'),
     path('logout/', logout_view, name='logout'),
     path('register/', register_view, name='register'),
+
+    # API user authentication
+    path('users_api/', include('users_api.urls', namespace='users_api')),
+    # path('api-auth/', include('rest_framework.urls')),
+    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 
     # Home page with no argument
     path('', homepage_view, name='home'),
@@ -52,6 +65,7 @@ urlpatterns = [
     # QR code
     path('qr_code/', include('qr_code.urls', namespace='qr_code'),)
 ]
+
 
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
