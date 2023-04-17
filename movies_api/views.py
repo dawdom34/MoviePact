@@ -1,12 +1,13 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
 
 from django.forms.models import model_to_dict
 
 from datetime import datetime, timedelta
 
-from movies.models import ProgramModel, SeatsModel
+from movies.models import ProgramModel, SeatsModel, TicketsModel
 
 from .serializers import DateFilterSerializer
 
@@ -107,5 +108,43 @@ class MovieDetailsAPIView(APIView):
             seance_details['tickets_sold_out'] = tickets_sold_out
 
             return Response(seance_details, status=status.HTTP_200_OK)
+        except ProgramModel.DoesNotExist:
+            return Response({'error': 'Seance with given id does not exist'}, status=status.HTTP_400_BAD_REQUEST)
+        
+
+class BuyTicketAPIView(APIView):
+    """
+    Choose a seats and create a ticket
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, **kwargs):
+        seance_id = kwargs.get('seance_id')
+        user = request.user
+        try:
+            data = {}
+            seance = ProgramModel.objects.get(id=seance_id)
+            # Get taken seats for the seance
+            seats = SeatsModel.objects.filter(program=seance)
+            taken_seats = ''
+            if len(seats) > 0:
+                for seat_number in seats:
+                    taken_seats += seat_number.seats_numbers + ','
+            
+
+            # Get seats reserved by authenticated user
+            tickets = TicketsModel.objects.filter(program=seance, user=user)
+            reserved_seats = ''
+            if len(tickets)  > 0:
+                # Append seats reserved by user
+                for ticket in tickets:
+                    reserved_seats += ticket.seats.seats_numbers + ','
+            
+            data['title'] = seance.movie.title
+            data['date'] = seance.date
+            data['taken_seats'] = taken_seats
+            data['reserved_seats'] = reserved_seats
+
+            return Response(data, status=status.HTTP_200_OK)
         except ProgramModel.DoesNotExist:
             return Response({'error': 'Seance with given id does not exist'}, status=status.HTTP_400_BAD_REQUEST)
