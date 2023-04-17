@@ -6,7 +6,7 @@ from django.forms.models import model_to_dict
 
 from datetime import datetime, timedelta
 
-from movies.models import ProgramModel
+from movies.models import ProgramModel, SeatsModel
 
 from .serializers import DateFilterSerializer
 
@@ -34,7 +34,6 @@ class DateFilterAPIView(APIView):
     Get movie sessions for selected day
     """
     def get(self, request):
-        print(request.data)
         serializer = DateFilterSerializer(data=request.data)
         if serializer.is_valid():
             data = {}
@@ -63,3 +62,50 @@ class DateFilterAPIView(APIView):
             data['program'] = program_data
             return Response(data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+class MovieDetailsAPIView(APIView):
+    """
+    Get seance details and information about vacanties
+    """
+    def get(self, request, **kwargs):
+        # Get seance with given id
+        seance_id = kwargs.get('seance_id')
+        try:
+            seance = ProgramModel.objects.get(id=seance_id)
+            # Seance details
+            seance_details = {}
+            seance_details['id'] = seance.id
+            seance_details['title'] = seance.movie.title
+            seance_details['description'] = seance.movie.description
+            seance_details['category'] = seance.movie.category
+            seance_details['duration'] = seance.movie.duration
+            seance_details['age_category'] = seance.movie.age_category
+            seance_details['premiere'] = seance.movie.release_date
+            seance_details['cast'] = seance.movie.cast
+            seance_details['direction'] = seance.movie.direction
+            seance_details['script'] = seance.movie.script
+            seance_details['price'] = seance.price
+
+            # check if the seance has vacancies
+            # Get taken seats for given seance
+            seats = SeatsModel.objects.filter(program=seance)
+            taken_seats = ''
+            # Append all seats numbers to the string
+            for x in seats:
+                taken_seats += x.seats_numbers + ','
+            # Convert string to array
+            taken_seats_arr = taken_seats.split(',')
+            # Delete last argument from array, it's empty string
+            taken_seats_arr.pop(-1)
+            # Check if the length of array is equal 48 (the cinema hall has 48 seats available)
+            if len(taken_seats_arr) == 48:
+                tickets_sold_out = True
+            else:
+                tickets_sold_out = False
+
+            seance_details['tickets_sold_out'] = tickets_sold_out
+
+            return Response(seance_details, status=status.HTTP_200_OK)
+        except ProgramModel.DoesNotExist:
+            return Response({'error': 'Seance with given id does not exist'}, status=status.HTTP_400_BAD_REQUEST)

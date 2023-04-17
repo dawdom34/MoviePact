@@ -7,4 +7,3 @@ class DateFilterSerializer(serializers.Serializer):
 
     class Meta:
         fields = ['date']
-
