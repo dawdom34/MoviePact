@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 from movies.models import ProgramModel, SeatsModel, TicketsModel
 from movies.utils import check_if_refundable
 
-from .serializers import DateFilterSerializer, CreateTicketSerializer
+from .serializers import DateFilterSerializer, CreateTicketSerializer, ReturnTicketSerializer
 
 
 class HomePageAPIView(APIView):
@@ -187,3 +187,15 @@ class TicketsAPIView(APIView):
             data[ticket.id] = temp
         return Response(data, status=status.HTTP_200_OK)
         
+
+class ReturnTicketAPIVIew(APIView):
+    """
+    Return the ticket if it's possible
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = ReturnTicketSerializer(data=request.data, context={'user': request.user})
+        if serializer.is_valid():
+            return Response({'msg': 'Ticket returned'}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

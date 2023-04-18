@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from movies.models import ProgramModel, SeatsModel, TicketsModel
+from movies.utils import check_if_refundable
 
 
 
@@ -53,4 +54,32 @@ class CreateTicketSerializer(serializers.Serializer):
                     TicketsModel.objects.create(program=program, user=user, seats=reserved_seats)
         except ProgramModel.DoesNotExist:
             raise serializers.ValidationError('Given seance does not exist!')
+        return attrs
+    
+
+class ReturnTicketSerializer(serializers.Serializer):
+    ticket_id = serializers.IntegerField()
+
+    class Meta:
+        fields = ['ticket_id']
+
+    def validate(self, attrs):
+        ticket_id = attrs.get('ticket_id')
+        user = self.context.get('user')
+        try:
+            ticket = TicketsModel.objects.get(id=int(ticket_id))
+            # Confirm that the ticket belong to authenticated user
+            if ticket.user == user:
+                # Check if ticket is refundable
+                if check_if_refundable(ticket_id):
+                    # Delete seats and ticket
+                    seats = SeatsModel.objects.get(id=ticket.seats.id)
+                    seats.delete()
+                    ticket.delete()
+                else:
+                    raise serializers.ValidationError('You cannot return this ticket. Less than 12 hours left until the show')
+            else:
+                raise serializers.ValidationError('Error while returning the ticket.')
+        except TicketsModel.DoesNotExist:
+            raise serializers.ValidationError('Ticket does not exist.')
         return attrs
