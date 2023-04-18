@@ -199,3 +199,25 @@ class ReturnTicketAPIVIew(APIView):
         if serializer.is_valid():
             return Response({'msg': 'Ticket returned'}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+class LoadQRCodeAPIView(APIView):
+    """
+    Returns the data needed to generate the qr code 
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, **kwargs):
+        ticket_id = kwargs.get('ticket_id')
+        user = request.user
+        try:
+            ticket = TicketsModel.objects.get(id=ticket_id)
+            # Check if the ticket belongs to authenticated user
+            if ticket.user == user:
+                qr_code_info = f'{ticket.id}/{ticket.program.id}/{ticket.user.id}'
+                data = {'qr_code_info': qr_code_info}
+                return Response(data, status=status.HTTP_200_OK)
+            else:
+                return Response({'error': 'Error while loading QR code.'}, status=status.HTTP_400_BAD_REQUEST)
+        except TicketsModel.DoesNotExist:
+            return Response({'error': 'This ticket does not exist.'}, status=status.HTTP_400_BAD_REQUEST)
