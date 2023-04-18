@@ -8,6 +8,7 @@ from django.forms.models import model_to_dict
 from datetime import datetime, timedelta
 
 from movies.models import ProgramModel, SeatsModel, TicketsModel
+from movies.utils import check_if_refundable
 
 from .serializers import DateFilterSerializer, CreateTicketSerializer
 
@@ -87,6 +88,7 @@ class MovieDetailsAPIView(APIView):
             seance_details['direction'] = seance.movie.direction
             seance_details['script'] = seance.movie.script
             seance_details['price'] = seance.price
+            seance_details['poster'] = seance.movie.poster.url
 
             # check if the seance has vacancies
             # Get taken seats for given seance
@@ -161,3 +163,27 @@ class CreateTicketAPIView(APIView):
         if serializer.is_valid():
             return Response({'msg': 'Ticket created'}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+class TicketsAPIView(APIView):
+    """
+    View all tickets of authenticated user
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        # Get all tickets of authenticated user whose show date is greater or equal today
+        user_tickets = TicketsModel.objects.filter(user=user, program__date__date__gte=datetime.now().date())
+        data = {}
+        for ticket in user_tickets:
+            temp = {}
+            temp['id'] = ticket.id
+            temp['title'] = ticket.program.movie.title
+            temp['date'] = ticket.program.date
+            temp['poster'] = ticket.program.movie.poster.url
+            temp['seats'] = ticket.seats.seats_numbers
+            temp['refundable'] = check_if_refundable(ticket.id)
+            data[ticket.id] = temp
+        return Response(data, status=status.HTTP_200_OK)
+        
