@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 
 from movies.models import ProgramModel, SeatsModel, TicketsModel
 
-from .serializers import DateFilterSerializer
+from .serializers import DateFilterSerializer, CreateTicketSerializer
 
 
 class HomePageAPIView(APIView):
@@ -148,3 +148,16 @@ class BuyTicketAPIView(APIView):
             return Response(data, status=status.HTTP_200_OK)
         except ProgramModel.DoesNotExist:
             return Response({'error': 'Seance with given id does not exist'}, status=status.HTTP_400_BAD_REQUEST)
+        
+
+class CreateTicketAPIView(APIView):
+    """
+    Create a ticket after user buy it
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = CreateTicketSerializer(data=request.data, context={'user': request.user})
+        if serializer.is_valid():
+            return Response({'msg': 'Ticket created'}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
