@@ -74,12 +74,11 @@ class MoviesTest(BaseTest):
         self.assertIsInstance(movie, MovieModel)
 
     def test_create_movie_post_invalid(self):
+        # Login user with privileges
+        self.client.post(self.login_url, self.auth_superuser_data)
         data = {'title': 'title', 'description': 'ExampleDescription', 'trailer_link': 'https://www.youtube.com', 'category': 'category', 'duration': 123, 'age_category': 12,
                            'cast': 'cast', 'release_date': datetime.now().date(), 'direction': 'dir', 'script': 'script'}
-        self.client.post(self.create_movie_url, data)
-        response = self.client.post(self.create_movie_url)
-        m = MovieModel.objects.get(title='title')
-        self.assertIsInstance(m, MovieModel)
+        response = self.client.post(self.create_movie_url, data)
         self.assertEqual(response.status_code, 200)
         
 

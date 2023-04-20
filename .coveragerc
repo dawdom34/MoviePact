@@ -1,5 +1,5 @@
 [run]
-source = users/, movies/, users_api/
+source = users/, movies/, users_api/, movies_api/
 omit=
     venv
     */apps.py

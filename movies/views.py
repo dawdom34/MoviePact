@@ -211,7 +211,7 @@ def create_ticket_view(request):
             try:
                 for seat in seats.split(','):
                     # If seat is already occupied
-                    s = SeatsModel.objects.get(seats_numbers__contains=seat)
+                    s = SeatsModel.objects.get(program = program, seats_numbers__contains=seat)
                     if len(seats.split(',')) > 1:
                         payload['response'] = 'One of the selected seats is already occupied.'
                     else:

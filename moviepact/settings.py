@@ -59,6 +59,8 @@ INSTALLED_APPS = [
     'crispy_forms',
     'users',
     'movies',
+    'users_api',
+    'movies_api'
 ]
 
 # JWT Configuration
