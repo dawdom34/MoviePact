@@ -35,7 +35,7 @@ class DateFilterAPIView(APIView):
     """
     Get movie sessions for selected day
     """
-    def get(self, request):
+    def post(self, request):
         serializer = DateFilterSerializer(data=request.data)
         if serializer.is_valid():
             data = {}
