@@ -1,34 +1,202 @@
 {% extends 'moviepact/base.html' %}
-
+{% load static %}
 {% block content %}
 
+<style>
+    #date-container {
+        min-height: 100%;
+        padding-left: 8px;
+    }
+
+    .date {
+        border: 1px solid rgb(109, 107, 107);
+        height: 96px;
+        width: 82px;
+        float: left;
+        border-radius: 20%;
+        margin-right: 5px;
+    }
+
+    .date p {
+        text-align: center;
+        font-size: small;
+    }
+
+    .date:hover {
+        background-color: rgb(207, 207, 207);
+        cursor: pointer;
+    }
+
+    .date br {
+        display: block;
+        margin: 10px 0;
+        line-height: 2px;
+        content: " ";
+    }
+
+    #today {
+        background-color: rgb(207, 207, 207);
+    }
+
+    .movie-container {
+        border: 1px solid red;
+        height: 250px;
+        width: 100%;
+    }
+
+    .poster {
+        height: 100%;
+        width: 200px;
+        background-color: black;
+        float: left;
+    }
+
+    .movie-info {
+        height: 100%;
+        width: 400px;
+        background-color: blue;
+        float: right;
+    }
+
+
+    img {
+        -webkit-user-drag: none;
+        -moz-user-drag: none;
+        -o-user-drag: none;
+
+    }
+
+    img {
+        pointer-events: none;
+    }
+
+    .movie_card {
+        padding: 0 !important;
+        width: 22rem;
+        margin: 14px;
+        border-radius: 10px;
+        box-shadow: 0 3px 4px 0 rgba(0, 0, 0, 0.2), 0 4px 15px 0 rgba(0, 0, 0, 0.19);
+    }
+
+    .movie_card img {
+        border-top-left-radius: 10px;
+        border-top-right-radius: 10px;
+        height: 33rem;
+    }
+
+    .movie_info {
+        color: #5e5c5c;
+        font-weight: 500;
+    }
+
+    .movie_info i {
+        font-size: 20px;
+    }
+
+    .card-title {
+        width: 80%;
+        height: 4rem;
+    }
+
+    .play_button {
+        background-color: #ff3d49;
+        position: absolute;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        right: 20px;
+        bottom: 111px;
+        font-size: 27px;
+        padding-left: 21px;
+        padding-top: 16px;
+        color: #FFFFFF;
+        cursor: pointer;
+    }
+
+    .credits {
+        margin-top: 20px;
+        margin-bottom: 20px;
+        border-radius: 8px;
+        border: 2px solid #8e24aa;
+        font-size: 18px;
+    }
+
+    .credits .card-body {
+        padding: 0;
+    }
+
+    .credits p {
+        padding-top: 15px;
+        padding-left: 18px;
+    }
+
+    .credits .card-body i {
+        color: #8e24aa;
+    }
+    a {
+        color: black;
+        text-decoration: none;
+    }
+    a:hover{
+        color: black;
+        text-decoration: none;
+    }
+</style>
 
 <div class="container-fluid" style="padding-top: 100px;">
-	<div class="row">
-		<div class="col-md-12">
-			<div class="row" style="min-height: 300px;">
-				<div class="col-md-2">
-				</div>
-				<div class="col-md-8" id="dates" style="border: 1px solid black;">
-					<h1>Repertoire</h1>
-					<div class="btn-group btn-group-sm" role="group" style="border: 1px solid red; margin-left: 22px;">
-				 
-						<button class="btn btn-secondary" type="button" style="width: 120px;">
-							<p>{{today.0}}</p><br><p>{{today.1}}</p>
-						</button> 
-						{% for x in days %}
-						<button class="btn btn-secondary" type="button" style="width: 120px;">
-							<p>{{x.0}}</p><br><p>{{x.1}}</p>
-						</button> 
-						{% endfor %}
-						
-					</div>
-				</div>
-				<div class="col-md-2">
-				</div>
-			</div>
-		</div>
-	</div>
+    <div class="row">
+
+        <div class="col-md-2">
+        </div>
+        <div class="col-md-8" id="dates">
+
+            <div id="date-container">
+                <h2>Repertoire {{today.1}} {{today.0}}</h2>
+                <div class="date" id="today">
+                    <p>{{today.0}}</p><br>
+                    <p>{{today.1}}</p>
+                </div>
+                {% for x in days %}
+                <a href="{% url 'movies:filter' date=x.2 %}"><div class="date">
+                    <p>{{x.0}}</p><br>
+                    <p>{{x.1}}</p>
+                </div></a>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="col-md-2">
+        </div>
+
+    </div>
+    <div class="row" style="margin-top: 150px;">
+        <div class="col-md-2">
+        </div>
+        <div class="col-md-8" style="min-height: 300px;">
+            <div class="row justify-content-center" style="height: 100%;">
+                {% for x in program %}
+                <a href="{% url 'movies:details' seance_id=x.id %}">
+                <div class="card movie_card">
+                    <img src="{{x.movie.poster.url}}" class="card-img-top" alt="...">
+                    <div class="card-body">
+                        
+                        <h5 class="card-title">{{x.movie.title}}</h5>
+                        <span class="movie_info">
+                            <p>Release date: {{x.movie.release_date}}
+                        </span><br>
+                        <span class="movie_info">Age category: {{x.movie.age_category}}+</span><br>
+                        <span class="movie_info">Screening time: {{x.date.time}}</span><br>
+                        <span class="movie_info">Price: {{x.price}}$</span>
+                        <span class="movie_info float-right">Duration: {{x.movie.duration}} min.</span>
+                    </div>
+                </div></a>
+                {% endfor %}
+            </div>
+
+        </div>
+        <div class="col-md-2">
+        </div>
+    </div>
+
 </div>
 
 {% endblock %}

@@ -86,7 +86,7 @@ def homepage_view(request):
         context['today'] = today
         context['days'] = days
 
-    return render(request, 'movies/home_page_beta.html', context)
+    return render(request, 'movies/home_page.html', context)
 
 def date_filter_view(request, *args, **kwargs):
     """

@@ -120,7 +120,6 @@
     }
 
     body {
-
         min-height: 100vh;
         display: flex;
         align-items: center;
@@ -131,9 +130,14 @@
         margin: 0;
     }
 
+
     * {
 
         box-sizing: border-box;
+    }
+
+    #my-footer{
+        display: none;
     }
 </style>
 
@@ -314,8 +318,7 @@
     buyButton.addEventListener('click', e => {
         sendTicketData('{{seance.id}}', seatsNumbers.toString(), uiUpdateFunction);
     })
-    
-    
+
 </script>
 
 {% include 'movies/snippets/send_ticket_data.html' %}
