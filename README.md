@@ -29,6 +29,9 @@ MoviePact is a simple application that allows you to easily book a ticket for yo
   
   ![my_tickets](https://user-images.githubusercontent.com/79845962/233987130-030708ab-ec6e-4734-abe7-5268742dc60e.jpg)
   
+- ### API
+  The application has implemented RESTful api created with django rest framework. The API supports all the above-described functionalities
+  
 ## Setup (Windows)
 1. Create virtual environment and activate it. To do this open cmd and execute commands below
 ```bash
